@@ -1,7 +1,7 @@
 @echo off
 REM Script para instalar dependências no Windows
 REM Autor: Felipe Resende e Felipe Couto - UFMG - 2026
-REM Descrição: Instala as bibliotecas Python necessárias para rodar transformada.py e convolucao.py
+REM Descrição: Instala as bibliotecas Python necessárias para rodar os scripts do projeto
 
 echo.
 echo ================================
@@ -47,5 +47,6 @@ echo.
 echo Você pode agora executar:
 echo   python transformada.py
 echo   python convolucao.py
+echo   python Simulações/Amp_Op.py
 echo.
 pause

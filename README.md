@@ -1,4 +1,4 @@
-# Estudo da Transformada de Fourier e Convolução para Análise de Sinais
+﻿# Estudo da Transformada de Fourier e Convolução para Análise de Sinais
 
 Trabalho acadêmico de Engenharia dedicado ao estudo da **Transformada de Fourier** e da **Convolução** aplicadas ao processamento de sinais. O projeto utiliza simulações computacionais para demonstrar as principais vantagens da análise no domínio da frequência, incluindo redução da complexidade computacional, identificação de componentes espectrais e filtragem de ruídos.
 
@@ -15,6 +15,7 @@ Trabalho acadêmico de Engenharia dedicado ao estudo da **Transformada de Fourie
 - [Resultados Esperados](#resultados-esperados)
 - [Fundamentação Teórica](#fundamentação-teórica)
 - [Discussão dos Resultados](#discussão-dos-resultados)
+- [Observações](#observações)
 - [Licença](#licença)
 
 ---
@@ -26,7 +27,8 @@ Demonstrar experimentalmente algumas das principais vantagens da Transformada de
 - Simplificação computacional de operações de convolução;
 - Identificação das frequências presentes em um sinal;
 - Filtragem de ruídos no domínio da frequência;
-- Visualização e interpretação do espectro de sinais.
+- Visualização e interpretação do espectro de sinais;
+- Comparação entre convolução direta e convolução via FFT com métricas de erro e desempenho.
 
 Os experimentos implementados permitem relacionar diretamente a teoria estudada em Processamento de Sinais e Equações Diferenciais com resultados obtidos por simulação computacional.
 
@@ -36,6 +38,7 @@ Os experimentos implementados permitem relacionar diretamente a teoria estudada 
 
 - Python 3.7 ou superior
 - NumPy ≥ 1.20
+- SciPy ≥ 1.11
 - Matplotlib ≥ 3.3
 
 ---
@@ -63,35 +66,25 @@ Trabalho_EDB/
 │
 ├── src/
 │   ├── transformada.py
-│   ├── convolucao.py
+│   └── convolucao.py
+│
+├── Simulações/
+│   ├── Amp_Op.py
 │   └── simu_teo.py
 │
 ├── outputs/
-│
-├── docs/
-│   ├── README.md
-│   └── LICENSE
+│   └── interface.py
 │
 ├── requirements.txt
 ├── instalar_dependencias.bat
-└── .gitignore
+└── README.md
 ```
 
 ---
 
 # Como Executar
 
-## Executar todos os experimentos
-
-```bash
-cd src
-
-python transformada.py
-python convolucao.py
-python simu_teo.py
-```
-
-## Executar individualmente
+## Executar os scripts principais
 
 ### Transformada de Fourier
 
@@ -105,13 +98,25 @@ python src/transformada.py
 python src/convolucao.py
 ```
 
-### Simulações Teóricas
+### Benchmark com FFT e convolução direta
 
 ```bash
-python src/simu_teo.py
+python Simulações/Amp_Op.py
 ```
 
-Todos os gráficos gerados serão exibidos na tela e, caso implementado nos scripts, poderão ser salvos automaticamente na pasta `outputs/`.
+### Simulações teóricas adicionais
+
+```bash
+python Simulações/simu_teo.py
+```
+
+### Interface para visualizar os resultados do Amp_Op
+
+```bash
+python outputs/interface.py
+```
+
+Todos os gráficos gerados serão exibidos na tela. O script `Amp_Op.py` imprime os resultados do benchmark em texto, enquanto a interface em `outputs/interface.py` permite executar esse benchmark em uma janela gráfica.
 
 ---
 
@@ -173,6 +178,30 @@ Demonstrar o cálculo da convolução e comparar a implementação direta com a 
 
 ---
 
+## Amp_Op.py
+
+### Objetivo
+
+Comparar a convolução direta com a convolução realizada via FFT em sistemas lineares representados por filtros e avaliar o erro entre os métodos.
+
+### Funcionalidades
+
+- Geração de sinal composto por senoides e ruído;
+- Resposta impulsiva de filtros RC e Butterworth;
+- Convolução direta com `numpy.convolve`;
+- Convolução via FFT usando `scipy.fft`;
+- Cálculo do erro RMS entre os métodos;
+- Medição do speedup obtido com o uso da FFT.
+
+### Resultados obtidos
+
+- Tempo de execução da convolução direta;
+- Tempo de execução da convolução via FFT;
+- Valor do speedup;
+- Erro RMS entre as saídas.
+
+---
+
 ## simu_teo.py
 
 ### Objetivo
@@ -216,6 +245,21 @@ São exibidos:
 
 ---
 
+## interface.py
+
+### Objetivo
+
+Disponibilizar uma interface gráfica simples para executar o benchmark do `Amp_Op.py` e visualizar o resultado diretamente na tela.
+
+### Funcionalidades
+
+- Botão para executar o benchmark;
+- Campo de texto com a saída do script;
+- Botão para limpar a saída;
+- Execução em background para não travar a interface.
+
+---
+
 # Resultados Esperados
 
 ## Transformada de Fourier
@@ -232,6 +276,16 @@ Por exemplo:
 ## Convolução
 
 Os resultados obtidos pela convolução direta e pela convolução via FFT devem ser praticamente idênticos, diferindo apenas por pequenos erros numéricos inerentes ao cálculo computacional.
+
+---
+
+## Benchmark Amp_Op
+
+O script `Amp_Op.py` deve apresentar:
+
+- erro RMS muito pequeno entre as saídas;
+- ganho de desempenho da FFT em relação à convolução direta;
+- valores consistentes para diferentes durações de sinal.
 
 ---
 
@@ -319,6 +373,8 @@ Os experimentos realizados demonstram que:
 
 4. A análise no domínio da frequência constitui uma ferramenta fundamental em aplicações de telecomunicações, controle, eletrônica, processamento digital de sinais e análise de sistemas físicos.
 
+5. A implementação do benchmark em `Amp_Op.py` e a interface em `outputs/interface.py` tornam os resultados mais acessíveis e fáceis de comparar.
+
 ---
 
 # Observações
@@ -327,11 +383,10 @@ Os experimentos realizados demonstram que:
 - Os valores obtidos podem variar dependendo do hardware utilizado.
 - Para sinais pequenos, a convolução direta pode ser competitiva; para sinais maiores, métodos baseados em FFT tendem a apresentar melhor desempenho.
 - Os gráficos gerados possuem identificação completa dos eixos e das unidades utilizadas.
+- O script `Amp_Op.py` utiliza `scipy` para a implementação da FFT e da resposta impulsiva de filtros.
 
 ---
 
 # Licença
 
 Este projeto foi desenvolvido para fins acadêmicos.
-
-Consulte o arquivo `LICENSE` para informações adicionais.

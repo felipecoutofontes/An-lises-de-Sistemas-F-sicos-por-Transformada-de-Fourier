@@ -1,61 +1,173 @@
-import time
-import os
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, os.pardir, "outputs"))
+def fft_sinal(x, fs):
+    """
+    FFT de um sinal.
+    """
 
+    X = np.fft.fft(x)
 
-def compute_fft_and_plot(t, x, name, output_dir=None):
-    """Compute FFT and save plot to outputs directory"""
-    if output_dir is None:
-        output_dir = OUTPUT_DIR
-    dt = t[1] - t[0]
-    N = len(t)
-    X = np.fft.fftshift(np.fft.fft(x)) * dt
-    freq = np.fft.fftshift(np.fft.fftfreq(N, d=dt))
-    omega = 2 * np.pi * freq
+    freq = np.fft.fftfreq(len(x), 1/fs)
 
-    fig, axes = plt.subplots(2, 1, figsize=(8, 6))
-    axes[0].plot(t, x)
-    axes[0].set_title(f"x(t): {name}")
-    axes[0].set_xlabel("t")
-
-    axes[1].plot(omega, np.abs(X))
-    axes[1].set_title(f"|X(omega)|: {name}")
-    axes[1].set_xlabel("omega (rad/s)")
-
-    plt.tight_layout()
-    os.makedirs(output_dir, exist_ok=True)
-    out_path = os.path.join(output_dir, f"transformada_{name}.png")
-    fig.savefig(out_path)
-    print(f"Saved {out_path}")
-    plt.close(fig)
+    return freq, X
 
 
-def main():
-    # time vector
-    t = np.linspace(-1.0, 1.0, 2048, endpoint=False)
+def filtrar_passa_baixas(x, fs, fc):
+    """
+    Remove frequências acima de fc.
+    """
 
-    # 3 example signals
-    s1 = np.sin(2 * np.pi * 5 * t)  # sine 5 Hz
-    s2 = np.sign(np.sin(2 * np.pi * 3 * t))  # square-ish 3 Hz
-    sigma = 0.05
-    s3 = np.exp(-t ** 2 / (2 * sigma ** 2))  # gaussian pulse
+    X = np.fft.fft(x)
 
-    signals = [(s1, "sine_5Hz"), (s2, "square_3Hz"), (s3, "gaussian_pulse")]
+    freq = np.fft.fftfreq(len(x), 1/fs)
 
-    total_start = time.perf_counter()
-    for x, name in signals:
-        start = time.perf_counter()
-        compute_fft_and_plot(t, x, name)
-        elapsed = time.perf_counter() - start
-        print(f"FFT {name} took {elapsed:.6f} seconds")
+    X_filtrado = X.copy()
 
-    total_time = time.perf_counter() - total_start
-    print(f"Total FFT runtime: {total_time:.6f} seconds")
+    X_filtrado[np.abs(freq) > fc] = 0
+
+    x_filtrado = np.fft.ifft(X_filtrado)
+
+    return x_filtrado.real
 
 
-if __name__ == "__main__":
-    main()
+def espectro_magnitude(x, fs):
+
+    X = np.fft.fft(x)
+
+    freq = np.fft.fftfreq(len(x), 1/fs)
+
+    return freq, np.abs(X)
+
+# ==================================================
+# SINAL
+# ==================================================
+
+fs = 1000
+
+t = np.arange(0,1,1/fs)
+
+sinal_util = np.sin(2*np.pi*5*t)
+
+ruido = 0.3*np.sin(2*np.pi*150*t)
+
+x = sinal_util + ruido
+
+
+# ==================================================
+# FFT
+# ==================================================
+
+X = np.fft.fft(x)
+
+freq = np.fft.fftfreq(len(x),1/fs)
+
+
+# ==================================================
+# FILTRAGEM
+# ==================================================
+
+X_filtrado = X.copy()
+
+X_filtrado[np.abs(freq) > 50] = 0
+
+x_filtrado = np.fft.ifft(X_filtrado)
+
+
+# ==================================================
+# COMPARAÇÃO DE TEMPOS
+# ==================================================
+
+h = np.exp(-20*t)
+
+inicio = time.perf_counter()
+
+y_conv = np.convolve(x,h)
+
+fim = time.perf_counter()
+
+tempo_conv = fim - inicio
+
+
+inicio = time.perf_counter()
+
+X1 = np.fft.fft(x,len(x)+len(h)-1)
+
+H1 = np.fft.fft(h,len(x)+len(h)-1)
+
+Y = X1*H1
+
+y_fft = np.fft.ifft(Y)
+
+fim = time.perf_counter()
+
+tempo_fft = fim - inicio
+
+
+print()
+print("TEMPOS DE EXECUÇÃO")
+print("-----------------------")
+print(f"Convolução direta : {tempo_conv:.6f} s")
+print(f"Via FFT           : {tempo_fft:.6f} s")
+
+print()
+
+if tempo_fft != 0:
+    print(
+        f"A abordagem via Fourier foi "
+        f"{tempo_conv/tempo_fft:.2f} vezes mais rápida."
+    )
+
+
+# ==================================================
+# GRÁFICOS
+# ==================================================
+
+plt.figure(figsize=(12,8))
+
+plt.subplot(3,1,1)
+plt.plot(t,x)
+
+plt.title("Sinal no domínio do tempo")
+plt.xlabel("Tempo (s)")
+plt.ylabel("Amplitude")
+plt.grid(True)
+
+plt.subplot(3,1,2)
+plt.plot(freq[:500],np.abs(X[:500]))
+
+plt.title("Transformada de Fourier |X(f)|")
+plt.xlabel("Frequência (Hz)")
+plt.ylabel("Magnitude")
+plt.grid(True)
+
+plt.subplot(3,1,3)
+plt.plot(t,x_filtrado.real)
+
+plt.title("Sinal após filtragem")
+plt.xlabel("Tempo (s)")
+plt.ylabel("Amplitude")
+plt.grid(True)
+
+plt.subplot(3,1,2)
+
+plt.plot(freq[:500], np.abs(X[:500]))
+
+plt.axvline(5, linestyle='--')
+plt.axvline(150, linestyle='--')
+
+plt.text(5, max(np.abs(X[:500]))*0.9, "5 Hz")
+plt.text(150, max(np.abs(X[:500]))*0.6, "150 Hz")
+
+plt.title("Transformada de Fourier |X(f)|")
+plt.xlabel("Frequência (Hz)")
+plt.ylabel("Magnitude")
+plt.grid(True)
+
+#pico em 5 Hz → sinal desejado;
+#pico em 150 Hz → ruído;
+#após remover as frequências acima de 50 Hz, o ruído desaparece.
+
+plt.tight_layout()
+plt.show()
