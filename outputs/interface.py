@@ -15,7 +15,13 @@ from PIL import Image, ImageTk
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 
-AMP_OP_PATH = BASE_DIR / "Simulações" / "Amp_Op.py"
+SIMULACOES = {
+    "RC": BASE_DIR / "Simulações" / "Simu_RC.py",
+    "Amp Op Final": BASE_DIR / "Simulações" / "Simu_Op_final.py",
+    "Amp Op": BASE_DIR / "Simulações" / "Amp_Op.py",
+}
+
+MODULO_ATUAL = "RC"
 
 
 # ==========================================================
@@ -23,26 +29,17 @@ AMP_OP_PATH = BASE_DIR / "Simulações" / "Amp_Op.py"
 # ==========================================================
 
 def carregar_amp_op():
+    path = SIMULACOES[MODULO_ATUAL]
+    
+    if not path.exists():
+        raise FileNotFoundError(f"Arquivo não encontrado:\n{path}")
 
-    if not AMP_OP_PATH.exists():
-
-        raise FileNotFoundError(
-            f"Arquivo não encontrado:\n{AMP_OP_PATH}"
-        )
-
-    spec = importlib.util.spec_from_file_location(
-        "amp_op",
-        AMP_OP_PATH
-    )
+    spec = importlib.util.spec_from_file_location("amp_op", path)
 
     if spec is None or spec.loader is None:
-
-        raise RuntimeError(
-            f"Não foi possível carregar:\n{AMP_OP_PATH}"
-        )
+        raise RuntimeError(f"Não foi possível carregar:\n{path}")
 
     modulo = importlib.util.module_from_spec(spec)
-
     spec.loader.exec_module(modulo)
 
     return modulo
@@ -168,6 +165,18 @@ class InterfaceAmpOp:
             side=tk.LEFT,
             padx=20
         )
+        self.seletor_modulo = ttk.Combobox(
+            controles,
+            values=list(SIMULACOES.keys()),
+            state="readonly",
+            width=20
+        )
+
+        self.seletor_modulo.set(MODULO_ATUAL)
+
+        self.seletor_modulo.pack(side=tk.LEFT, padx=10)
+
+        self.seletor_modulo.bind("<<ComboboxSelected>>", self._trocar_modulo)
 
         # --------------------------
         # Tabela
@@ -455,6 +464,18 @@ class InterfaceAmpOp:
         self._abrir_visualizador_graficos(graficos)
 
     # ------------------------------------------------------
+
+    def _trocar_modulo(self, event=None):
+        global MODULO_ATUAL
+
+        MODULO_ATUAL = self.seletor_modulo.get()
+
+        self.status.configure(
+            text=f"Módulo selecionado: {MODULO_ATUAL}"
+        )
+
+        # opcional: limpar resultados ao trocar
+        self.limpar()
 
     # ------------------------------------------------------
 
