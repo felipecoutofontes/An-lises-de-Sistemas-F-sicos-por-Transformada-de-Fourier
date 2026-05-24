@@ -21,11 +21,9 @@ build/
 Thumbs.db
 
 # Project specific
-outputs/
 *.png
 tempCodeRunnerFile.py
-transformada2.py
-convolucao2.py
+
 
 # Virtual environments
 venv/
