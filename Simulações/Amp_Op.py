@@ -28,20 +28,17 @@ OUTPUT_DIR = Path(__file__).resolve().parent.parent / "outputs"
 # Geração de sinal de teste
 # ==========================================================
 
-def gerar_sinal(fs, duracao):
-    """
-    Sinal composto por várias senoides + ruído.
-    """
+def gerar_sinal(fs, duracao, ruido=False):
 
     t = np.arange(0, duracao, 1/fs)
 
     x = (
         np.sin(2*np.pi*100*t)
-        + 0.5*np.sin(2*np.pi*500*t)
-        + 0.25*np.sin(2*np.pi*2000*t)
+        + 0.5*np.sin(2*np.pi*3000*t)
     )
 
-    x += 0.05*np.random.randn(len(t))
+    if ruido:
+        x += 0.3*np.random.randn(len(t))
 
     return t, x
 
