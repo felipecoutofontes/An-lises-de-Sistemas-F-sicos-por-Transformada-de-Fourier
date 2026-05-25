@@ -19,9 +19,10 @@ SIMULACOES = {
     "RC": BASE_DIR / "Simulações" / "Simu_RC.py",
     "Amp Op Final": BASE_DIR / "Simulações" / "Simu_Op_final.py",
     "Amp Op": BASE_DIR / "Simulações" / "Amp_Op.py",
+
 }
 
-MODULO_ATUAL = "RC"
+MODULO_ATUAL = "Amp Op Final"
 
 
 # ==========================================================

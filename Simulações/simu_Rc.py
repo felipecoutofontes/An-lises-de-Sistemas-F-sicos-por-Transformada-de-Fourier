@@ -18,7 +18,7 @@ def main():
     # ==========================================================
     # EXPLICAÇÃO TEÓRICA (IMPRESSA NO CONSOLE)
     # ==========================================================
-    print("\n📐 FUNDAMENTAÇÃO TEÓRICA:")
+    print("\n FUNDAMENTAÇÃO TEÓRICA:")
     print("-" * 40)
     print("Circuito RC Passa-Baixa:")
     print("  Equação diferencial: RC * dy(t)/dt + y(t) = x(t)")
@@ -54,7 +54,7 @@ def main():
     # Sinal com ruído (usado como entrada padrão)
     x_ruido = x_original + 0.4 * np.random.randn(len(t))
     
-    print(f"\n📡 SINAL DE ENTRADA:")
+    print(f"\n SINAL DE ENTRADA:")
     print(f"   Componentes: 10 Hz (amplitude 1) + 20 Hz (amplitude 0.5)")
     print(f"   Ruído adicionado: Ruído branco gaussiano (amplitude 0.4)")
 
@@ -70,7 +70,7 @@ def main():
     inicio = perf_counter()
     y_conv = np.convolve(x_ruido, h, mode="full")[:N]
     tempo_conv = perf_counter() - inicio
-    print(f"\n🔄 PROCESSANDO SINAL...")
+    print(f"\n PROCESSANDO SINAL...")
     print(f"   Convolução: {tempo_conv:.6f} s")
 
     # ----------------------------
@@ -128,7 +128,7 @@ def main():
 
     pos = freqs >= 0
     
-    print("\n🎨 GERANDO GRÁFICOS...")
+    print("\n GERANDO GRÁFICOS...")
 
     # ==========================================================
     # FIGURA 1: COMPARAÇÃO BÁSICA (ORIGINAL)
@@ -242,7 +242,7 @@ def main():
     plt.subplot(1, 2, 2)
     metodos = ['Convolução', 'FFT']
     tempos = [tempo_conv, tempo_fft]
-    cores = ['#FF6B6B', '#4ECDC4']
+    cores = ['#FF6B6B','#4ECDC4']
     barras = plt.bar(metodos, tempos, color=cores, alpha=0.7)
     plt.title("Comparação de Desempenho")
     plt.ylabel("Tempo de Execução (s)")
@@ -291,7 +291,7 @@ def main():
     caminho_fig4 = OUTPUT_DIR / "rc_filtragem_detalhada.png"
     plt.savefig(caminho_fig4, dpi=150, bbox_inches="tight")
 
-    print(f"\n💾 GRÁFICOS SALVOS EM:")
+    print(f"\n GRÁFICOS SALVOS EM:")
     print(f"   - {caminho_fig1}")
     print(f"   - {caminho_fig2}")
     print(f"   - {caminho_fig3}")
@@ -301,13 +301,13 @@ def main():
     # RESUMO FINAL
     # ==========================================================
     print("\n" + "=" * 60)
-    print("📈 RESUMO DA SIMULAÇÃO:")
+    print(" RESUMO DA SIMULAÇÃO:")
     print("=" * 60)
-    print(f"✅ Convolução e FFT produziram resultados equivalentes")
+    print(f" Convolução e FFT produziram resultados equivalentes")
     print(f"   Erro RMS entre métodos: {erro:.2e}")
-    print(f"✅ FFT foi {speedup:.2f}x mais rápida que convolução direta")
-    print(f"✅ O filtro RC removeu efetivamente o ruído de alta frequência")
-    print(f"\n🔬 CONCEITOS DEMONSTRADOS:")
+    print(f" FFT foi {speedup:.2f}x mais rápida que convolução direta")
+    print(f" O filtro RC removeu efetivamente o ruído de alta frequência")
+    print(f"\n CONCEITOS DEMONSTRADOS:")
     print(f"   1. Teorema da Convolução: convolução no tempo = multiplicação na frequência")
     print(f"   2. Característica passa-baixa do circuito RC")
     print(f"   3. Atenuação de componentes de alta frequência (ruído)")
@@ -336,15 +336,15 @@ def main():
     }
     
     # Verificação das chaves (debug)
-    print("\n🔍 VERIFICAÇÃO DE COMPATIBILIDADE:")
+    print("\n VERIFICAÇÃO DE COMPATIBILIDADE:")
     chaves_esperadas = ["sistema", "amostras", "tempo_conv", "tempo_fft", 
                         "speedup", "erro_rms", "numerador", "denominador", 
                         "entrada", "saida_conv", "saida_fft", "impulso"]
     for chave in chaves_esperadas:
         if chave in resultado:
-            print(f"   ✅ {chave} = {type(resultado[chave]).__name__}")
+            print(f"    {chave} = {type(resultado[chave]).__name__}")
         else:
-            print(f"   ❌ {chave} NÃO ENCONTRADA!")
+            print(f"    {chave} NÃO ENCONTRADA!")
     
     return resultado
 
@@ -355,9 +355,9 @@ def main():
 
 def executar_testes():
     """Função para integração com GUI"""
-    print("\n🚀 EXECUTANDO TESTES...")
+    print("\n EXECUTANDO TESTES...")
     resultado = main()
-    print("\n✅ TESTES CONCLUÍDOS COM SUCESSO!")
+    print("\n TESTES CONCLUÍDOS COM SUCESSO!")
     return [resultado]
 
 

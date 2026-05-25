@@ -413,9 +413,7 @@ def executar_testes():
     tamanhos = [
         0.01,
         0.05,
-        0.10,
-        0.20,
-        0.50
+        0.10
     ]
 
     resultados = []
@@ -455,9 +453,7 @@ def main():
     tamanhos = [
         0.01,
         0.05,
-        0.10,
-        0.20,
-        0.50
+        0.10
     ]
 
     print("\nCOMPARAÇÃO FFT x CONVOLUÇÃO")
