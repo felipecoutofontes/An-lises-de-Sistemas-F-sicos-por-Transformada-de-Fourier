@@ -152,15 +152,17 @@ def erro_rms(y1, y2):
 # ==========================================================
 
 def espectro(x, fs):
+    N = len(x)
 
     X = np.fft.fft(x)
+    freq = np.fft.fftfreq(N, d=1/fs)
 
-    freq = np.fft.fftfreq(
-        len(x),
-        d=1/fs
+    mascara = freq >= 0
+
+    return (
+        freq[mascara],
+        2*np.abs(X[mascara])/N
     )
-
-    return freq, np.abs(X)
 
 
 # ==========================================================
@@ -346,17 +348,9 @@ def benchmark(
 
         plt.subplot(4,1,4)
 
-        plt.plot(
-            freq_x[:metade],
-            mag_x[:metade],
-            label="Entrada"
-        )
-
-        plt.plot(
-            freq_y[:metade],
-            mag_y[:metade],
-            label="Saída"
-        )
+        plt.plot(freq_x, mag_x, label="Entrada")
+        plt.plot(freq_y, mag_y, label="Saída")
+        plt.xlim(0, 1000)
 
         plt.legend()
 

@@ -22,7 +22,7 @@ SIMULACOES = {
 
 }
 
-MODULO_ATUAL = "Amp Op Final"
+MODULO_ATUAL = "Amp Op"
 
 
 # ==========================================================
