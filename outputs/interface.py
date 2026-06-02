@@ -771,8 +771,7 @@ Erro RMS:
 
 Entrada:
 x(t)=sin(2π100t)
-    +0.5sin(2π500t)
-    +0.25sin(2π2000t)
+    +0.25sin(2π3000t)
     +ruído
 """
 

@@ -51,7 +51,7 @@ def gerar_sinal(fs, duracao, ruido=False):
 def sistema_simples():
 
     R = 1e3
-    C = 100e-9
+    C = 1e-5 
 
     tau = R * C
 
@@ -248,8 +248,7 @@ def benchmark(
 
     print(
         "x(t)=sin(2π100t)"
-        "+0.5sin(2π500t)"
-        "+0.25sin(2π2000t)"
+        "+0.25sin(2π3000t)"
         "+ruído"
     )
 
