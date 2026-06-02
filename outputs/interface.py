@@ -1,5 +1,7 @@
 import importlib.util
 import os
+import subprocess
+import sys
 import threading
 from pathlib import Path
 
@@ -16,8 +18,7 @@ from PIL import Image, ImageTk
 BASE_DIR = Path(__file__).resolve().parents[1]
 
 SIMULACOES = {
-    "RC": BASE_DIR / "Simulações" / "Simu_RC.py",
-    "Amp Op Final": BASE_DIR / "Simulações" / "Simu_Op_final.py",
+    "RC": BASE_DIR / "Simulações" / "RC_graf.py",
     "Amp Op": BASE_DIR / "Simulações" / "Amp_Op.py",
 
 }
@@ -35,7 +36,11 @@ def carregar_amp_op():
     if not path.exists():
         raise FileNotFoundError(f"Arquivo não encontrado:\n{path}")
 
-    spec = importlib.util.spec_from_file_location("amp_op", path)
+    module_name = (
+        f"simulacao_{MODULO_ATUAL.lower().replace(' ', '_')}"
+    )
+
+    spec = importlib.util.spec_from_file_location(module_name, path)
 
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Não foi possível carregar:\n{path}")
@@ -44,6 +49,23 @@ def carregar_amp_op():
     spec.loader.exec_module(modulo)
 
     return modulo
+
+
+def _executar_script(path):
+    processo = subprocess.Popen(
+        [sys.executable, str(path)],
+        cwd=BASE_DIR,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+
+    stdout, stderr = processo.communicate()
+
+    if processo.returncode != 0:
+        raise RuntimeError(
+            f"Erro ao executar {path.name}:\n{stderr.strip()}"
+        )
 
 
 # ==========================================================
@@ -413,6 +435,19 @@ class InterfaceAmpOp:
 
         try:
 
+            path = SIMULACOES[MODULO_ATUAL]
+
+            if MODULO_ATUAL == "RC":
+                _executar_script(path)
+                self.root.after(
+                    0,
+                    lambda: self._finalizar_abertura_graficos(
+                        [],
+                        rc_only=True
+                    )
+                )
+                return
+
             if self.modulo is None:
                 self.modulo = carregar_amp_op()
 
@@ -447,13 +482,19 @@ class InterfaceAmpOp:
 
     # ------------------------------------------------------
 
-    def _finalizar_abertura_graficos(self, graficos):
+    def _finalizar_abertura_graficos(self, graficos, rc_only=False):
 
         self.status.configure(
             text="Pronto."
         )
 
         if not graficos:
+            if rc_only:
+                messagebox.showinfo(
+                    "RC Gerado",
+                    "O módulo RC foi executado em uma janela separada."
+                )
+                return
 
             messagebox.showinfo(
                 "Aviso",
@@ -477,138 +518,6 @@ class InterfaceAmpOp:
 
         # opcional: limpar resultados ao trocar
         self.limpar()
-
-    # ------------------------------------------------------
-
-    def _mostrar_erro(self, mensagem):
-
-        self._ativar_estado_espera()
-
-        messagebox.showerror(
-            "Erro",
-            mensagem
-        )
-
-        # --------------------------
-        # Botões
-        # --------------------------
-
-        controles = ttk.Frame(frame)
-
-        controles.pack(
-            fill=tk.X,
-            pady=(0, 10)
-        )
-
-        self.btn_executar = ttk.Button(
-            controles,
-            text="Executar Benchmark",
-            command=self.executar
-        )
-
-        self.btn_executar.pack(
-            side=tk.LEFT
-        )
-
-        self.btn_graficos = ttk.Button(
-            controles,
-            text="Abrir Gráficos",
-            command=self.abrir_graficos
-        )
-
-        self.btn_graficos.pack(
-            side=tk.LEFT,
-            padx=10
-        )
-
-        self.btn_limpar = ttk.Button(
-            controles,
-            text="Limpar",
-            command=self.limpar
-        )
-
-        self.btn_limpar.pack(
-            side=tk.LEFT
-        )
-
-        self.status = ttk.Label(
-            controles,
-            text=""
-        )
-
-        self.status.pack(
-            side=tk.LEFT,
-            padx=20
-        )
-
-        # --------------------------
-        # Tabela
-        # --------------------------
-
-        self.tabela = ttk.Treeview(
-            frame,
-            columns=(
-                "sistema",
-                "amostras",
-                "conv",
-                "fft",
-                "speedup",
-                "erro"
-            ),
-            show="headings",
-            height=12
-        )
-
-        colunas = {
-            "sistema": "Sistema",
-            "amostras": "Amostras",
-            "conv": "Tempo Conv.",
-            "fft": "Tempo FFT",
-            "speedup": "Speedup FFT",
-            "erro": "Erro RMS"
-        }
-
-        for coluna, titulo in colunas.items():
-
-            self.tabela.heading(
-                coluna,
-                text=titulo
-            )
-
-        self.tabela.pack(
-            fill=tk.X
-        )
-
-        self.tabela.bind(
-            "<<TreeviewSelect>>",
-            self.mostrar_detalhes
-        )
-
-        # --------------------------
-        # Painel detalhes
-        # --------------------------
-
-        detalhes_frame = ttk.LabelFrame(
-            frame,
-            text="Detalhes do Sistema"
-        )
-
-        detalhes_frame.pack(
-            fill=tk.BOTH,
-            expand=True,
-            pady=10
-        )
-
-        self.txt_detalhes = tk.Text(
-            detalhes_frame,
-            height=20,
-            font=("Consolas", 10)
-        )
-
-        self.txt_detalhes.pack(
-            fill=tk.BOTH,
-            expand=True
-        )
 
     # ------------------------------------------------------
 
@@ -667,6 +576,20 @@ class InterfaceAmpOp:
     def _executar_em_background(self):
 
         try:
+
+            if MODULO_ATUAL == "RC":
+                path = SIMULACOES[MODULO_ATUAL]
+                _executar_script(path)
+                self.root.after(
+                    0,
+                    lambda: [
+                        self.status.configure(
+                            text="RC executado em uma janela separada."
+                        ),
+                        self._ativar_estado_espera()
+                    ]
+                )
+                return
 
             self.modulo = carregar_amp_op()
 
